@@ -1,4 +1,5 @@
 var React = require('react-native');
+var TimeAgo = require('../helpers/TimeAgo');
 
 var {
   StyleSheet,
@@ -8,32 +9,11 @@ var {
   Image
 } = React;
 
-var dummy_content = [
-  {
-    'title': 'First title',
-    'type': 'text',
-    'author': {
-      'id': 1,
-      'username': 'Username_1'
-    }
-  },
-  {
-    'title': 'Second title',
-    'type': 'image',
-    'author': {
-      'id': 2,
-      'username': 'Username_2'
-    }
-  },
-  {
-    'title': 'First title',
-    'type': 'link',
-    'author': {
-      'id': 3,
-      'username': 'Username_3'
-    }
-  }
-]
+var HOST = 'https://www.reddit.com/';
+var SUBREDDIT = '';
+var EXTENSION = '.json';
+
+var REQUEST_URL = "".concat(HOST, SUBREDDIT, EXTENSION);
 
 var ReactdditIndex = React.createClass({
   getInitialState: function() {
@@ -48,10 +28,15 @@ var ReactdditIndex = React.createClass({
     this.fetchData();
   },
   fetchData: function() {
-    this.setState({
-      dataSource: this.state.dataSource.cloneWithRows(dummy_content),
-      loaded: true
-    });
+    fetch(REQUEST_URL)
+    .then((response) => response.json())
+    .then((responseData) => {
+      this.setState({
+        dataSource: this.state.dataSource.cloneWithRows(responseData.data.children),
+        loaded: true
+      });
+    })
+    .done();
   },
   renderLoading() {
     return (
@@ -78,12 +63,24 @@ var ReactdditIndex = React.createClass({
     );
   },
   renderRow: function(item) {
+
     return(
-      <View style={styles.item}>
-        <Text style={styles.title}>{item.type}: {item.title}</Text>
-        <Text style={styles.username}>{item.author.username}</Text>
+      <View style={styles.itemWrapper}>
+        <View style={styles.ups}>
+          <Text style={styles.upsText}>{item.data.ups}</Text>
+        </View>
+        <View style={styles.item}>
+          <Text style={styles.title}>{item.data.title}</Text>
+          <Text style={styles.meta}>Posted {this.getTimeSince(item.data.created_utc)} in /r/{item.data.subreddit}</Text>
+          <Text style={styles.username}>{item.data.author} / {item.data.num_comments} Comments</Text>
+        </View>
       </View>
     );
+  },
+  getTimeSince: function(timestamp) {
+    var age = new TimeAgo(timestamp);
+
+    return age.text;
   },
   render: function() {
       if( !this.state.loaded ) {
@@ -115,17 +112,41 @@ var styles = StyleSheet.create({
     textAlign: 'center',
     margin: 10,
   },
+  itemWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    borderBottomColor: '#CCC',
+    borderBottomWidth: 1,
+  },
   item: {
-    margin: 10,
     flex: 1,
   },
   title: {
     color: '#666',
-    fontSize: 18
+    fontSize: 18,
+    margin: 10,
   },
   username: {
     color: '#DDD',
-    fontSize: 12
+    fontSize: 12,
+    margin: 10,
+    marginTop: 0,
+  },
+  meta: {
+    color: '#DDD',
+    fontSize: 12,
+    marginLeft: 10,
+    marginRight: 10,
+  },
+  ups: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    margin: 15
+  },
+  upsText: {
+    color: '#CCC',
+    fontSize: 20,
   }
 });
 
