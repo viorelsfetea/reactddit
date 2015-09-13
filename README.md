@@ -2,6 +2,6 @@
 
 Reactddit is a React Native client for Reddit
 
-_Under heavey development_
+_Under heavy development_
 
 Current version is: I just started, still reading the documentation
