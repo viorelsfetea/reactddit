@@ -1,8 +1,5 @@
-[![Stories in Ready](https://badge.waffle.io/viorelsfetea/reactddit.png?label=ready&title=Ready)](https://waffle.io/viorelsfetea/reactddit)
 # Reactddit
 
-Reactddit is a React Native client for Reddit
+Reactddit is a React Native client for Reddit. It is a learn-by-doing project.
 
-_Under heavy development_
-
-Current version is: I just started, still reading the documentation
+Status: [![Stories in Ready](https://badge.waffle.io/viorelsfetea/reactddit.png?label=ready&title=Ready)](https://waffle.io/viorelsfetea/reactddit)
