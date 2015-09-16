@@ -9,24 +9,24 @@ class TimeAgo {
 
     this.VARIANTS = [
       {
-        key: 'minutes',
-        minimumSecondsPassed: MINUTE_IN_SECONDS
-      },
-      {
-        key: 'hours',
-        minimumSecondsPassed: HOUR_IN_SECONDS
-      },
-      {
-        key: 'days',
-        minimumSecondsPassed: DAY_IN_SECONDS
+        key: 'years',
+        minimumSecondsPassed: YEAR_IN_SECONDS
       },
       {
         key: 'months',
         minimumSecondsPassed: MONTH_IN_SECONDS
       },
       {
-        key: 'years',
-        minimumSecondsPassed: YEAR_IN_SECONDS
+        key: 'days',
+        minimumSecondsPassed: DAY_IN_SECONDS
+      },
+      {
+        key: 'hours',
+        minimumSecondsPassed: HOUR_IN_SECONDS
+      },
+      {
+        key: 'minutes',
+        minimumSecondsPassed: MINUTE_IN_SECONDS
       }
     ];
 
