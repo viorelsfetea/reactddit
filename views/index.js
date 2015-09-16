@@ -6,7 +6,8 @@ var {
   Text,
   View,
   ListView,
-  Image
+  Image,
+  TouchableHighlight
 } = React;
 
 var HOST = 'https://www.reddit.com/';
@@ -15,6 +16,12 @@ var EXTENSION = '.json';
 
 var REQUEST_URL = "".concat(HOST, SUBREDDIT, EXTENSION);
 
+var STATUS_LOADING = 'loading';
+var STATUS_STANDBY = 'standby';
+var STATUS_ENDREACHED = 'end_reached';
+
+var cache = [];
+
 var ReactdditIndex = React.createClass({
   getInitialState: function() {
     return {
@@ -22,6 +29,8 @@ var ReactdditIndex = React.createClass({
         rowHasChanged: (row1, row2) => row1 !== row2,
       }),
       loaded: false,
+      status: STATUS_LOADING,
+      after: false
     };
   },
   componentDidMount: function() {
@@ -31,9 +40,12 @@ var ReactdditIndex = React.createClass({
     fetch(REQUEST_URL)
     .then((response) => response.json())
     .then((responseData) => {
+      cache = cache.concat(responseData.data.children);
       this.setState({
         dataSource: this.state.dataSource.cloneWithRows(responseData.data.children),
-        loaded: true
+        loaded: true,
+        status: STATUS_STANDBY,
+        after: responseData.data.after
       });
     })
     .done();
@@ -57,13 +69,54 @@ var ReactdditIndex = React.createClass({
         <ListView
           dataSource={this.state.dataSource}
           renderRow={this.renderRow}
+          renderFooter={this.renderFooter}
+          onEndReachedThreshold={100}
           style={styles.listView}
         />
       </View>
     );
   },
-  renderRow: function(item) {
+  renderFooterLoadMoreButton: function(){
+    return(
+      <View style={styles.listFooter}>
+        <TouchableHighlight style={styles.loadMoreButton} onPress={this.loadNextPage.bind(this)}>
+          <Text>Load more</Text>
+        </TouchableHighlight>
+      </View>
+    );
+  },
+  renderFooterLoading: function(){
+    return(<View style={styles.listFooter}>
+      <Image source={require('image!Preloader')} />
+    </View>);
+  },
+  renderFooterEndReached: function(){
+    return(
+        <View style={styles.listFooter}>
+          <View>
+            <Image source={require('image!Preloader')} />
+          </View>
+          <View>
+            <Text style={styles.status}>NO MORE ITEMS TO LOAD</Text>
+          </View>
+        </View>
 
+    );
+  },
+  renderFooter: function() {
+    switch (this.state.status) {
+      case STATUS_LOADING:
+          return this.renderFooterLoading();
+        break;
+      case STATUS_STANDBY:
+          return this.renderFooterLoadMoreButton();
+        break;
+      case STATUS_ENDREACHED:
+          return this.renderFooterEndReached();
+        break;
+    }
+  },
+  renderRow: function(item) {
     return(
       <View style={styles.itemWrapper}>
         <View style={styles.ups}>
@@ -81,6 +134,30 @@ var ReactdditIndex = React.createClass({
     var age = new TimeAgo(timestamp);
 
     return age.text;
+  },
+  loadNextPage: function(){
+    var NEXT_URL = REQUEST_URL.concat("?after=" + this.state.after);
+
+    this.setState({
+        status: STATUS_LOADING
+    });
+
+    fetch(NEXT_URL)
+    .then((response) => response.json())
+    .then((responseData) => {
+      cache = cache.concat(responseData.data.children);
+      if( responseData.data.children ){
+        this.setState({
+            dataSource: this.state.dataSource.cloneWithRows(cache),
+            loaded: true,
+            status: STATUS_STANDBY,
+            after: responseData.data.after
+        });
+      }
+
+    })
+    .done();
+
   },
   render: function() {
       if( !this.state.loaded ) {
@@ -140,13 +217,23 @@ var styles = StyleSheet.create({
   },
   ups: {
     justifyContent: 'center',
-    alignItems: 'center',
     alignSelf: 'center',
-    margin: 15
+    margin: 15,
+    width: 60
   },
   upsText: {
     color: '#CCC',
     fontSize: 20,
+  },
+  listFooter: {
+    flex: 1,
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  loadMoreButton: {
+    backgroundColor: '#84D9FE',
+    padding: 10
   }
 });
 
